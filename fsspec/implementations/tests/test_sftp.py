@@ -930,3 +930,16 @@ def test_processes_adding_keys_at_the_same_time_lose_none(tmp_path):
             future.result()
 
     assert len(paramiko.HostKeys(str(known_hosts))) == 100
+
+
+def test_host_name_with_non_ascii_characters_is_found_again(tmp_path):
+    """paramiko reads the file with the default encoding: so must we write it."""
+    known_hosts = tmp_path / "known_hosts"
+    key = paramiko.RSAKey.generate(2048)
+
+    fsspec.implementations.sftp._append_known_host(
+        str(known_hosts), "b\u00fccher.example", key
+    )
+
+    keys = paramiko.HostKeys(str(known_hosts))
+    assert keys.lookup("b\u00fccher.example")[key.get_name()] == key
