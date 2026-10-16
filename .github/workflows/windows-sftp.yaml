@@ -31,3 +31,6 @@ jobs:
         run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'Docker' }) -join ';'
           python -m pytest fsspec/implementations/tests/test_sftp.py -v -rs
+      - name: Probe
+        if: always()
+        run: python .github/windows-probe.py
