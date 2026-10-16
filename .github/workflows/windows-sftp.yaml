@@ -27,4 +27,7 @@ jobs:
       - name: Environment
         run: python -c "import os, sys, paramiko; print(sys.version); print('paramiko', paramiko.__version__); print(os.path.expanduser('~/.ssh/known_hosts'))"
       - name: Test
-        run: python -m pytest fsspec/implementations/tests/test_sftp.py -v -rs
+        # the docker based tests cannot start a Linux container here: skip them
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'Docker' }) -join ';'
+          python -m pytest fsspec/implementations/tests/test_sftp.py -v -rs
