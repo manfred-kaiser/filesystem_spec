@@ -8,6 +8,7 @@ import subprocess
 import threading
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from tarfile import TarFile
 
 import pytest
@@ -772,7 +773,8 @@ def test_known_hosts_path_is_expanded(sshd, home):
     fs = _connect(port, known_hosts="~/extra_known_hosts", host_key_policy="reject")
 
     assert fs.ftp is not None
-    assert fs.known_hosts == str(home / "extra_known_hosts")
+    # expanduser keeps the "/" of the argument, so on Windows the separators mix
+    assert Path(fs.known_hosts) == home / "extra_known_hosts"
 
 
 def _paramiko_stops_at_marker():
@@ -858,7 +860,8 @@ def test_non_text_known_hosts_refuse_the_connection(sshd, home, target):
     known_hosts.write_bytes(b"host \xff\xfe ssh-ed25519 AAAA\n")
     kwargs = {} if target == "home" else {"known_hosts": str(known_hosts)}
 
-    with pytest.raises(UnicodeDecodeError):
+    # Windows reads with its code page, which decodes any byte: a bad line instead
+    with pytest.raises((UnicodeDecodeError, paramiko.hostkeys.InvalidHostKey)):
         _connect(port, **kwargs)
 
     assert _sees_no_authentication()
