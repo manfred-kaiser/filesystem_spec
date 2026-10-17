@@ -159,11 +159,16 @@ def check(path, procs, count):
     return missing, bad, dup
 
 
-def stress(variant, procs, count, rounds):
+def stress(variant, procs, count, rounds, budget):
+    start = time.time()
     failed = 0
     totals = [0, 0, 0]
     retries = 0
+    done = 0
     for r in range(rounds):
+        if time.time() - start > budget:
+            break
+        done += 1
         d = tempfile.mkdtemp()
         path = os.path.join(d, "known_hosts")
         with open(path, "wb") as f:
@@ -183,18 +188,18 @@ def stress(variant, procs, count, rounds):
         totals = [a + b for a, b in zip(totals, res)]
         failed += any(res)
     print(
-        f"{variant:34s} rounds failed: {failed}/{rounds}  "
+        f"{variant:34s} rounds failed: {failed}/{done}  "
         f"missing={totals[0]} torn={totals[1]} duplicated={totals[2]} "
         f"lock-retries={retries}"
     )
 
 
-def part2(procs, count, rounds):
-    print(f"== Part 2: {procs} processes x {count} appends, {rounds} rounds ==")
+def part2(procs, count, rounds, budget=90):
+    print(f"== Part 2: {procs} processes x {count} appends, up to {rounds} rounds ==", flush=True)
     for variant in VARIANTS:
         t = time.time()
-        stress(variant, procs, count, rounds)
-        print(f"   ({time.time() - t:.0f}s)")
+        stress(variant, procs, count, rounds, budget)
+        print(f"   ({time.time() - t:.0f}s)", flush=True)
 
 
 if __name__ == "__main__":
