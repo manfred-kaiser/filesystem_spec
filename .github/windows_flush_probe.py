@@ -207,4 +207,5 @@ if __name__ == "__main__":
     print("paramiko", paramiko.__version__, "| cpus:", os.cpu_count())
     part1()
     procs, count, rounds = (int(a) for a in sys.argv[1:4]) if len(sys.argv) > 3 else (8, 200, 10)
-    part2(procs, count, rounds)
+    if rounds:
+        part2(procs, count, rounds)

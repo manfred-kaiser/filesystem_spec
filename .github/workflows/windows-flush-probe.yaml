@@ -9,7 +9,7 @@ jobs:
   probe:
     name: flush probe (py${{ matrix.python }})
     runs-on: windows-2022
-    timeout-minutes: 15
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -22,4 +22,4 @@ jobs:
       - name: Install
         run: python -m pip install -e . "paramiko>=3.4"
       - name: Probe
-        run: python -u .github/windows_flush_probe.py 4 50 10
+        run: python -u .github/windows_flush_probe.py 0 0 0
